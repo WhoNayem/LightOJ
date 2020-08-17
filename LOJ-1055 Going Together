@@ -1,0 +1,138 @@
+#include <bits/stdc++.h>
+using namespace std;
+#define __Mammamia__                ios_base :: sync_with_stdio(false);
+#define ll                          long long
+#define MAXN                        100007
+
+int n, Ax, Ay, Bx, By, Cx, Cy, found = 0, visited[11][11][11][11][11][11], dis[11][11][11][11][11][11];
+char grid[11][11];
+vector <pair <int, int> > targets;
+
+int dx[] = {0, 0, -1, 1};
+int dy[] = {1, -1, 0, 0};
+
+struct Nerd
+{
+    int xA, yA, xB, yB, xC, yC;
+};
+
+bool compRight(pair <int, int> a, pair <int, int> b)
+{
+    if (a.second != b.second) return a.second > b.second;
+    return a.first < b.first;
+}
+bool compLeft(pair <int, int> a, pair <int, int> b)
+{
+    if (a.second != b.second) return a.second < b.second;
+    return a.first < b.first;
+}
+bool compUp(pair <int, int> a, pair <int, int> b)
+{
+    if (a.first != b.first) return a.first < b.first;
+    return a.second < b.second;
+}
+bool compDown(pair <int, int> a, pair <int, int> b)
+{
+    if (a.first != b.first) return a.first > b.first;
+    return a.second < b.second;
+}
+
+bool isValid(int x, int y)
+{
+    if (x >= 1 && x <= n && y >= 1 && y <= n && grid[x][y] != '#') return true;
+    return false;
+}
+
+Nerd getPositions(Nerd t, int dir)
+{
+    int x, y;
+
+    vector <pair <int, int> > vec;
+    vec.push_back({t.xA,  t.yA});
+    vec.push_back({t.xB,  t.yB});
+    vec.push_back({t.xC,  t.yC});
+
+    if (dir == 0) sort(vec.begin(), vec.end(), compRight);
+    if (dir == 1) sort(vec.begin(), vec.end(), compLeft);
+    if (dir == 2) sort(vec.begin(), vec.end(), compUp);
+    if (dir == 3) sort(vec.begin(), vec.end(), compDown);
+
+    if (isValid(vec[0].first + dx[dir], vec[0].second + dy[dir])) vec[0].first += dx[dir], vec[0].second += dy[dir];
+
+    x = vec[1].first + dx[dir], y = vec[1].second + dy[dir];
+    if (isValid(x, y) && (x != vec[0].first || y != vec[0].second)) vec[1].first += dx[dir], vec[1].second += dy[dir];
+
+    x = vec[2].first + dx[dir], y = vec[2].second + dy[dir];
+    if (isValid(x, y) && (x != vec[0].first || y != vec[0].second) && (x != vec[1].first || y != vec[1].second)) vec[2].first += dx[dir], vec[2].second += dy[dir];
+
+    sort(vec.begin(), vec.end(), compUp);
+
+    t = {vec[0].first, vec[0].second, vec[1].first, vec[1].second, vec[2].first, vec[2].second};
+    return t;
+}
+
+void bfs()
+{
+    Nerd temp = {Ax, Ay, Bx, By, Cx, Cy};
+    dis[Ax][Ay][Bx][By][Cx][Cy] = 1;
+
+    int cnt = 0;
+
+    queue <Nerd> q; q.push(temp);
+    while(!q.empty())
+    {
+        cnt++;
+        Nerd t = q.front(); q.pop();
+        if (visited[t.xA][t.yA][t.xB][t.yB][t.xC][t.yC]) continue;
+        visited[t.xA][t.yA][t.xB][t.yB][t.xC][t.yC] = 1;
+
+        for (int i = 0; i < 4; ++i)
+        {
+            temp = getPositions(t, i);
+            int txA, tyA, txB, tyB, txC, tyC;
+
+            txA = temp.xA, tyA = temp.yA, txB = temp.xB, tyB = temp.yB, txC = temp.xC, tyC = temp.yC;
+
+            if (dis[txA][tyA][txB][tyB][txC][tyC] == -1) dis[txA][tyA][txB][tyB][txC][tyC] = dis[t.xA][t.yA][t.xB][t.yB][t.xC][t.yC] + 1;
+            else dis[txA][tyA][txB][tyB][txC][tyC] = min(dis[txA][tyA][txB][tyB][txC][tyC], dis[t.xA][t.yA][t.xB][t.yB][t.xC][t.yC] + 1);
+            if (!visited[txA][tyA][txB][tyB][txC][tyC])q.push(temp);
+        }
+    }
+    if (dis[targets[0].first][targets[0].second][targets[1].first][targets[1].second][targets[2].first][targets[2].second] == -1) cout << "trapped" << endl;
+    else cout << dis[targets[0].first][targets[0].second][targets[1].first][targets[1].second][targets[2].first][targets[2].second] - 1 << endl;
+
+}
+
+void init()
+{
+    memset(dis, -1, sizeof dis);
+    memset(visited, 0, sizeof visited);
+    memset(grid, '.', sizeof grid);
+    targets.clear();
+}
+
+int main ()
+{
+
+    int test_case, case_no = 0; cin >> test_case;
+    while(test_case--)
+    {
+        cin >> n; init();
+
+        for (int i = 1; i <= n; ++i)
+        {
+            for (int j = 1; j <= n; ++j)
+            {
+                cin >> grid[i][j];
+
+                if (grid[i][j] == 'A') Ax = i, Ay = j;
+                if (grid[i][j] == 'B') Bx = i, By = j;
+                if (grid[i][j] == 'C') Cx = i, Cy = j;
+                if (grid[i][j] == 'X') targets.push_back({i, j});
+            }
+        }
+        sort(targets.begin(), targets.end(), compUp);
+        cout << "Case " << ++case_no << ": "; bfs();
+    }
+    return 0;
+}
