@@ -1,0 +1,50 @@
+#include <bits/stdc++.h>
+using namespace std;
+#define __Mammamia__                ios_base :: sync_with_stdio(false);
+#define ll                          long long
+#define MAXN                        57
+
+string str;
+int dp[MAXN][MAXN][MAXN];
+
+bool isVowel(char ch) {if(ch == 'A' || ch == 'E' || ch == 'I' || ch == 'O' || ch == 'U') return true; else return false;}
+
+int solve(int idx, int v, int c)
+{
+    if (v == 3 || c == 5) return 0;
+    if (idx == str.size()) return 1;
+
+    int &ret = dp[idx][v][c];
+    if (~ret) return ret;
+
+    if (str[idx] == '?')
+    {
+        int call1 = solve(idx + 1, v + 1, 0);
+        int call2 = solve(idx + 1, 0, c + 1);
+
+        if (call1 != call2 || call1 == 2 || call2 == 2) ret = 2;
+        else ret = call2;
+    }
+    else if (isVowel(str[idx])) ret = solve(idx + 1, v + 1, 0);
+    else ret = solve(idx + 1, 0, c + 1);
+
+    return ret;
+}
+
+int main ()
+{
+    __Mammamia__
+
+    int test_case, case_no = 0; cin >> test_case;
+    while(test_case--)
+    {
+        string res[] = {"BAD", "GOOD", "MIXED"};
+
+        cin >> str;
+
+        memset(dp, -1, sizeof dp);
+        int idx = solve(0, 0, 0);
+        cout << "Case " << ++case_no << ": " << res[idx] << endl;
+    }
+    return 0;
+}
