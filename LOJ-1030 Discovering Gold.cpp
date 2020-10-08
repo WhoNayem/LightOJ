@@ -29,4 +29,4 @@ int main()
         printf("Case %d: %.7lf\n", ++case_no, dp[1]);
     }
     return 0;
-}
+} 
